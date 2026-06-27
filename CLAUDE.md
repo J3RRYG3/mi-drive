@@ -70,10 +70,15 @@ docker compose logs -f
 
 ## Estado de la Construcción
 - [x] CLAUDE.md creado
-- [ ] Fase 1: Scaffolding e infraestructura local
-- [ ] Fase 2: Conectores multicloud
-- [ ] Fase 3: Features (endpoints + UI)
-- [ ] Push al repositorio remoto
+- [x] Fase 1: Scaffolding e infraestructura local (monorepo, Dockerfiles, docker-compose)
+- [x] Fase 2: Conectores multicloud (Cognito, GCP Storage, Prisma + Azure SQL)
+- [x] Fase 3: Features (endpoints Login + Signed URLs + UI React completa)
+- [x] Push al repositorio remoto (commit: `feat: scaffolding inicial`)
+
+## Próximos pasos para el usuario
+1. Copiar `.env.example` → `.env` y rellenar con outputs de Terraform
+2. Ejecutar `docker compose up --build` desde la raíz del proyecto
+3. Acceder a http://localhost:3000 para ver el frontend
 
 ## Repositorio Remoto
 `https://github.com/J3RRYG3/mi-drive.git`
