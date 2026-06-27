@@ -1,0 +1,32 @@
+{
+  "name": "@midrive/backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 8080",
+    "build": "next build",
+    "start": "next start -p 8080",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@midrive/shared": "*",
+    "next": "^14.2.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@aws-sdk/client-cognito-identity-provider": "^3.645.0",
+    "aws-jwt-verify": "^4.0.1",
+    "@google-cloud/storage": "^7.12.1",
+    "@prisma/client": "^5.19.1",
+    "mssql": "^11.0.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.1",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "prisma": "^5.19.1",
+    "typescript": "^5.5.3"
+  }
+}

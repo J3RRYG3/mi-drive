@@ -1,0 +1,95 @@
+# ─── Redes ────────────────────────────────────────────────────────────────────
+networks:
+  public_network:
+    driver: bridge
+  private_backend_network:
+    driver: bridge
+    internal: true
+
+# ─── Volúmenes ────────────────────────────────────────────────────────────────
+volumes:
+  mssql_data:
+
+# ─── Servicios ────────────────────────────────────────────────────────────────
+services:
+
+  # ── Base de datos: SQL Server (simulación Azure SQL Serverless) ──────────────
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: midrive-db
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ${AZURE_SQL_PASSWORD:-StrongPassw0rd!}
+      MSSQL_PID: Developer
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - private_backend_network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "${AZURE_SQL_PASSWORD:-StrongPassw0rd!}" -Q "SELECT 1" || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # ── Backend: Next.js (Cloud Run ready, puerto 8080) ──────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: midrive-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      # GCP
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GCP_CLIENT_EMAIL: ${GCP_CLIENT_EMAIL}
+      GCP_PRIVATE_KEY: ${GCP_PRIVATE_KEY}
+      GCP_BUCKET_NAME: ${GCP_BUCKET_NAME}
+      # Azure SQL
+      AZURE_SQL_SERVER: db
+      AZURE_SQL_DATABASE: ${AZURE_SQL_DATABASE:-midrive-user-db}
+      AZURE_SQL_USER: sa
+      AZURE_SQL_PASSWORD: ${AZURE_SQL_PASSWORD:-StrongPassw0rd!}
+      DATABASE_URL: sqlserver://db:1433;database=${AZURE_SQL_DATABASE:-midrive-user-db};user=sa;password=${AZURE_SQL_PASSWORD:-StrongPassw0rd!};encrypt=false;trustServerCertificate=true
+      # AWS Cognito
+      AWS_REGION: ${AWS_REGION}
+      AWS_COGNITO_USER_POOL_ID: ${AWS_COGNITO_USER_POOL_ID}
+      AWS_COGNITO_CLIENT_ID: ${AWS_COGNITO_CLIENT_ID}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - private_backend_network
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: wget -qO- http://localhost:8080/api/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ── Frontend: React + Vite (Nginx, puerto 3000) ──────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    container_name: midrive-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - public_network
+      - private_backend_network
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: wget -qO- http://localhost:3000 || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
