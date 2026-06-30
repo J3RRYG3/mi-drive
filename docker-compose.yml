@@ -24,7 +24,10 @@ services:
       MSSQL_PID: Developer
     volumes:
       - mssql_data:/var/opt/mssql
+    ports:
+      - "1433:1433"
     networks:
+      - public_network
       - private_backend_network
     healthcheck:
       test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "${AZURE_SQL_PASSWORD:-StrongPassw0rd!}" -Q "SELECT 1" || exit 1
@@ -79,6 +82,8 @@ services:
       dockerfile: apps/frontend/Dockerfile
     container_name: midrive-frontend
     restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:8080
     depends_on:
       backend:
         condition: service_healthy
