@@ -48,3 +48,9 @@ coverage/
 
 # Misc
 .cache/
+
+# GitHub Secrets (NUNCA commitear)
+.github/secrets.env
+.github/gcp-service-account.json
+
+storage/*
