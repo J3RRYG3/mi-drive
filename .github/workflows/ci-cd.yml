@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -50,7 +50,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -114,7 +114,6 @@ jobs:
           flags: --allow-unauthenticated
           env_vars: |-
             NODE_ENV=production
-            PORT=8080
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
             GCP_CLIENT_EMAIL=${{ secrets.GCP_CLIENT_EMAIL }}
             GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }}
