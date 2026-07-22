@@ -101,10 +101,13 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      # Nota: GCP_PRIVATE_KEY debe estar almacenado en el secret con \n literales
-      # (no saltos de línea reales). El backend debe hacer .replace(/\\n/g, '\n')
-      # al usar la clave. Las repos de Docker Hub deben ser públicas para que
-      # Cloud Run pueda hacer pull sin autenticación adicional.
+      - name: Encode GCP credentials as base64
+        id: gcp_creds
+        env:
+          SA_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        run: echo "b64=$(printf '%s' "$SA_KEY" | base64 -w 0)" >> $GITHUB_OUTPUT
+
+      # Docker Hub repos deben ser públicas para que Cloud Run haga pull sin auth.
       - name: Deploy backend to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
@@ -114,7 +117,7 @@ jobs:
           flags: --allow-unauthenticated
           env_vars: |-
             NODE_ENV=production
-            GCP_SERVICE_ACCOUNT_KEY=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+            GCP_SERVICE_ACCOUNT_KEY_B64=${{ steps.gcp_creds.outputs.b64 }}
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
             GCP_CLIENT_EMAIL=${{ secrets.GCP_CLIENT_EMAIL }}
             GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }}

@@ -1,10 +1,13 @@
 import { Storage } from '@google-cloud/storage'
 
 function getStorageClient(): Storage {
-  // GCP_SERVICE_ACCOUNT_KEY (JSON completo) es más confiable que las vars
-  // individuales porque JSON.parse maneja el escaping del private_key
-  // correctamente, evitando corrupción de \n al pasar por Cloud Run env vars.
-  const saKeyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
+  // GCP_SERVICE_ACCOUNT_KEY_B64: el JSON completo en base64 para evitar que
+  // Cloud Run corrompa el JSON al pasar saltos de línea en env vars.
+  const b64 = process.env.GCP_SERVICE_ACCOUNT_KEY_B64
+  const raw = process.env.GCP_SERVICE_ACCOUNT_KEY
+  const saKeyJson = b64
+    ? Buffer.from(b64, 'base64').toString('utf8')
+    : raw
   if (saKeyJson) {
     const sa = JSON.parse(saKeyJson)
     return new Storage({
