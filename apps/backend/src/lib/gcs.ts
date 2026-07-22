@@ -1,13 +1,23 @@
 import { Storage } from '@google-cloud/storage'
 
 function getStorageClient(): Storage {
-  const privateKey = process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, '\n')
+  // GCP_SERVICE_ACCOUNT_KEY (JSON completo) es más confiable que las vars
+  // individuales porque JSON.parse maneja el escaping del private_key
+  // correctamente, evitando corrupción de \n al pasar por Cloud Run env vars.
+  const saKeyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
+  if (saKeyJson) {
+    const sa = JSON.parse(saKeyJson)
+    return new Storage({
+      projectId: sa.project_id,
+      credentials: { client_email: sa.client_email, private_key: sa.private_key },
+    })
+  }
 
   return new Storage({
     projectId: process.env.GCP_PROJECT_ID,
     credentials: {
       client_email: process.env.GCP_CLIENT_EMAIL,
-      private_key: privateKey,
+      private_key: process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     },
   })
 }

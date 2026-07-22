@@ -114,10 +114,10 @@ jobs:
           flags: --allow-unauthenticated
           env_vars: |-
             NODE_ENV=production
+            GCP_SERVICE_ACCOUNT_KEY=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
             GCP_CLIENT_EMAIL=${{ secrets.GCP_CLIENT_EMAIL }}
             GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }}
-            GCP_PRIVATE_KEY=${{ secrets.GCP_PRIVATE_KEY }}
             AWS_REGION=${{ secrets.AWS_REGION }}
             AWS_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USER_POOL_ID }}
             AWS_COGNITO_CLIENT_ID=${{ secrets.AWS_COGNITO_CLIENT_ID }}
